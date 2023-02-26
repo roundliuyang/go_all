@@ -1,0 +1,15 @@
+harvest:
+  port: 8091
+  agent:
+    cfg: http://127.0.0.1:8092/agent/config/get
+  media:
+    enabled: true
+    mediaItems: 15
+    interval: 300s
+    url: https://cms.test.mycool.tv/cms/media
+  taikang:
+    punch:
+      enabled: true
+      interval: 300s
+      uid: ' ' # 运动健康打卡uid
+      url: https://tktv.tkhealthcare.com/taikang/api/punch
