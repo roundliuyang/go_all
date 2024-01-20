@@ -9,6 +9,41 @@ import (
 	"net/http"
 )
 
+func pingbackRecordHandler(w http.ResponseWriter, r *http.Request) {
+	//m := helper.NewMsg()
+	//defer helper.WriteMsg(w, m)
+	//
+	//var (
+	//	e          error
+	//	item       = r.FormValue("item")
+	//	roomNumber = r.FormValue("roomNumber")
+	//	sTime      = r.FormValue("sTime")
+	//	eTime      = r.FormValue("eTime")
+	//)
+	//if item == "" {
+	//	m.Code, m.Msg = helper.CodeError, "require item"
+	//	return
+	//}
+	//if roomNumber == "" {
+	//	m.Code, m.Msg = helper.CodeError, "require roomNumber"
+	//	return
+	//}
+	//st, e := strconv.ParseInt(sTime, 10, 64)
+	//if e != nil {
+	//	m.Code, m.Msg = helper.CodeError, "require sTime"
+	//	return
+	//}
+	//et, e := strconv.ParseInt(eTime, 10, 64)
+	//if e != nil {
+	//	m.Code, m.Msg = helper.CodeError, "require eTime"
+	//	return
+	//}
+	//
+	//sT := time.Unix(st, 0)
+	//eT := time.Unix(et, 0)
+
+}
+
 type pbHandler struct {
 	analyzers []pingback.Analyzer
 }

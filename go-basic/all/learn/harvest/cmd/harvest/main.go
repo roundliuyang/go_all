@@ -24,7 +24,7 @@ func init() {
 func main() {
 	startRoutines()
 	router := httprouter.New()
-	//router.Handler(http.MethodGet, "/harvest/pingback/record", pingbackRecordHandler)
+	router.HandlerFunc(http.MethodGet, "/harvest/pingback/record", pingbackRecordHandler)
 	// 这个是运动打卡的
 	router.Handler(http.MethodGet, "/harvest/api/:version/data", newPbHandler())
 	port := cfg.Cfg.Port

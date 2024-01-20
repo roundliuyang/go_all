@@ -24,14 +24,14 @@ func TestUnsafe(t *testing.T) {
 // The cases is suitable for unsafe
 type MyInt int
 
-//合理的类型转换
+// 合理的类型转换
 func TestConvert(t *testing.T) {
 	a := []int{1, 2, 3, 4}
 	b := *(*[]MyInt)(unsafe.Pointer(&a))
 	t.Log(b)
 }
 
-//原子类型操作
+// 原子类型操作
 func TestAtomic(t *testing.T) {
 	var shareBufPtr unsafe.Pointer
 	writeDataFn := func() {
