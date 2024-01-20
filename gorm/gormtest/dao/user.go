@@ -44,3 +44,19 @@ func GetAll() []User {
 	}
 	return users
 }
+
+// 更新
+func UpdateById(id int64) {
+	err := DB.Model(&User{}).Where("id=?", id).Update("username", "lisisi")
+	if err != nil {
+		log.Println("update users  fail : ", err)
+	}
+}
+
+// 删除
+func DeleteById(id int64) {
+	err := DB.Where("id=?", id).Delete(&User{})
+	if err != nil {
+		log.Println("delete users  fail : ", err)
+	}
+}

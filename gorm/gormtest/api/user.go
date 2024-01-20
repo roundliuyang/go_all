@@ -27,3 +27,15 @@ func GetAll(c *gin.Context) {
 	all := dao.GetAll()
 	c.JSON(200, all)
 }
+
+func UpdateUser(c *gin.Context) {
+	dao.UpdateById(1)
+	user := dao.GetById(1)
+	c.JSON(200, user)
+}
+
+func DeleteUser(c *gin.Context) {
+	dao.DeleteById(1)
+	user := dao.GetById(1)
+	c.JSON(200, user)
+}

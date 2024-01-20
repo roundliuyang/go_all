@@ -6,4 +6,6 @@ func RegisterRouter(r *gin.Engine) {
 	r.GET("/save", SaveUser)
 	r.GET("/get", GetUser)
 	r.GET("/getAll", GetAll)
+	r.GET("/update", UpdateUser)
+	r.GET("/delete", DeleteUser)
 }
