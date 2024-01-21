@@ -1,6 +1,10 @@
 package dao
 
-import "log"
+import (
+	"gorm.io/gorm"
+	"log"
+	"time"
+)
 
 // 定义User模型，绑定users表，ORM库操作数据库，需要定义一个struct类型和MYSQL表进行绑定或者叫映射，struct字段和MYSQL表字段一一对应
 type User struct {
@@ -10,18 +14,29 @@ type User struct {
 	Username string `gorm:"column:username"`
 	Password string `gorm:"column:password"`
 	//创建时间，时间戳
-	CreateTime int64 `gorm:"column:createtime"`
+	CreateTime  int64 `gorm:"column:createtime"`
+	UserProfile UserProfile
+}
+
+type UserProfile struct {
+	ID     int64
+	UserId int64
+	Sex    int
+	Age    int
 }
 
 func (u User) TableName() string {
 	return "users"
 }
+func (u UserProfile) TableName() string {
+	return "user_profiles"
+}
 
 // 插入
 func Save(user *User) {
-	err := DB.Create(user)
-	if err != nil {
-		log.Println("insert fail : ", err)
+	result := DB.Create(user)
+	if result.Error != nil {
+		log.Println("insert fail : ", result.Error)
 	}
 }
 
@@ -59,4 +74,33 @@ func DeleteById(id int64) {
 	if err != nil {
 		log.Println("delete users  fail : ", err)
 	}
+}
+
+// 关联查询========================================================
+
+func Save2() {
+	db := DB.Session(&gorm.Session{})
+	var user = User{
+		Username:   "ms",
+		Password:   "ms",
+		CreateTime: time.Now().UnixMilli(),
+		UserProfile: UserProfile{
+			Sex: 0,
+			Age: 20,
+		},
+	}
+	db.Save(&user)
+}
+
+func GetById2(id int64) User {
+	var user User
+	err := DB.Preload("UserProfile").Where("id=?", id).First(&user).Error
+	err2 := DB.Joins("UserProfile").Where("id=?", id).First(&user).Error
+	if err != nil {
+		log.Println("query fail : ", err)
+	}
+	if err2 != nil {
+		log.Println("query fail : ", err2)
+	}
+	return user
 }

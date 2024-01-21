@@ -179,6 +179,7 @@ func Transaction3() {
 	tx.Commit() // Commit user1
 }
 
+// hook
 func (*Goods) BeforeCreate(tx *gorm.DB) (err error) {
 	log.Println("before create .....")
 	return nil
@@ -198,3 +199,22 @@ func (*Goods) BeforeSave(tx *gorm.DB) (err error) {
 	log.Println("before save .....")
 	return nil
 }
+
+// Scope
+func Paginate(page, pageSize int) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		offset := (page - 1) * pageSize
+		return db.Limit(pageSize).Offset(offset)
+	}
+}
+
+func FindUserAndGoods() {
+	db := DB.Session(&gorm.Session{})
+	var users []User
+	db.Scopes(Paginate(2, 2)).Find(&users)
+
+	var goods []Goods
+	db.Scopes(Paginate(2, 2)).Find(&goods)
+}
+
+// 子查询  todo

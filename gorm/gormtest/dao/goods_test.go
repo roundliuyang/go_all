@@ -39,3 +39,7 @@ func TestTransactionGoods(t *testing.T) {
 func TestTransaction3Goods(t *testing.T) {
 	Transaction3()
 }
+
+func TestScopesGoods(t *testing.T) {
+	FindUserAndGoods()
+}
