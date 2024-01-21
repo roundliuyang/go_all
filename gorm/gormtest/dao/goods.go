@@ -1,6 +1,9 @@
 package dao
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Goods struct {
 	Id         int
@@ -48,4 +51,45 @@ func UpdateGoods() {
 func DeleteGoods() {
 	DB.Delete(&Goods{}, 1)
 	//DB.Where("id=?", 1).Delete(&Goods{})
+}
+
+// 查询
+func FindGoods() {
+	var goods Goods
+	//  SELECT * FROM `goods` WHERE id=1 LIMIT 1
+	DB.Where("id=?", 1).Take(&goods)
+
+	//  SELECT * FROM `goods` WHERE id=1 AND `goods`.`id` = 1
+	DB.Where("id=?", 1).Find(&goods)
+
+	// SELECT * FROM `goods` WHERE id=1 AND `goods`.`id` = 1 ORDER BY `goods`.`id` LIMIT 1
+	DB.Where("id=?", 1).First(&goods)
+
+	// SELECT * FROM `goods` WHERE id=1 AND `goods`.`id` = 1 LIMIT 1
+	DB.Where("id=?", 1).Limit(1).Find(&goods)
+}
+
+// 分页查询
+func FindPageGoods() {
+	var goods []Goods
+	DB.Order("create_time desc").Limit(10).Offset(10).Find(&goods)
+}
+
+// 分组 todo
+
+// 直接执行sql语句
+func ExecGoods() {
+	//统计每个商品分类下面有多少个商品
+	//定一个Result结构体类型，用来保存查询结果
+	type Result struct {
+		Type  int
+		Total int
+	}
+	var results []Result
+
+	sql := "SELECT type, count(*) as  total FROM `goods` where create_time > ? GROUP BY type HAVING (total > 0)"
+	//因为sql语句使用了一个问号(?)作为绑定参数, 所以需要传递一个绑定参数(Raw第二个参数).
+	//Raw函数支持绑定多个参数
+	DB.Raw(sql, "2022-11-06 00:00:00").Scan(&results)
+	fmt.Println(results)
 }

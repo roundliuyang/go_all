@@ -19,3 +19,15 @@ func TestSaveGoods(t *testing.T) {
 func TestUpdateGoods(t *testing.T) {
 	UpdateGoods()
 }
+
+func TestFindGoods(t *testing.T) {
+	FindGoods()
+}
+
+func TestFindPageGoods(t *testing.T) {
+	FindPageGoods()
+}
+
+func TestExecGoods(t *testing.T) {
+	ExecGoods()
+}
