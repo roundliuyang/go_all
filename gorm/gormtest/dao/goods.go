@@ -2,6 +2,8 @@ package dao
 
 import (
 	"fmt"
+	"gorm.io/gorm"
+	"log"
 	"time"
 )
 
@@ -92,4 +94,107 @@ func ExecGoods() {
 	//Raw函数支持绑定多个参数
 	DB.Raw(sql, "2022-11-06 00:00:00").Scan(&results)
 	fmt.Println(results)
+}
+
+// 自动事务
+func Transaction() {
+	db := DB.Session(&gorm.Session{})
+	err := db.Transaction(func(tx *gorm.DB) error {
+		// 事务操作
+		goods1 := Goods{
+			Title: "苹果派",
+			Price: 6.5,
+			Stock: 200,
+			Type:  0,
+		}
+		if err := tx.Create(&goods1).Error; err != nil {
+			return err
+		}
+
+		goods2 := Goods{
+			Title: "苹果派苹果苹果苹果苹果苹果苹果苹果苹果苹果苹果苹果",
+			Price: 6.5,
+			Stock: 200,
+			Type:  0,
+		}
+		if err := tx.Create(&goods2).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	log.Println("transaction err", err)
+}
+
+// 手动事务
+func Transaction2() {
+	tx := DB.Begin()
+	goods1 := Goods{
+		Title: "苹果派",
+		Price: 6.5,
+		Stock: 200,
+		Type:  0,
+	}
+	if err := tx.Create(&goods1).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+
+	goods2 := Goods{
+		Title: "苹果派苹果苹果苹果苹果苹果苹果苹果苹果苹果苹果苹果",
+		Price: 6.5,
+		Stock: 200,
+		Type:  0,
+	}
+	if err := tx.Create(&goods2).Error; err != nil {
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+}
+
+// 嵌套事务 todo
+
+// 保存点
+func Transaction3() {
+	goods1 := Goods{
+		Title: "苹果派",
+		Price: 6.5,
+		Stock: 200,
+		Type:  0,
+	}
+	goods2 := Goods{
+		Title: "苹果派苹果苹果苹果苹果苹果苹果苹果苹果苹果苹果苹果",
+		Price: 6.5,
+		Stock: 200,
+		Type:  0,
+	}
+
+	tx := DB.Begin()
+	tx.Create(&goods1)
+
+	tx.SavePoint("sp1")
+	tx.Create(&goods2)
+	tx.RollbackTo("sp1") // Rollback user2
+
+	tx.Commit() // Commit user1
+}
+
+func (*Goods) BeforeCreate(tx *gorm.DB) (err error) {
+	log.Println("before create .....")
+	return nil
+}
+
+func (*Goods) AfterCreate(tx *gorm.DB) (err error) {
+	log.Println("after create .....")
+	return nil
+}
+
+func (*Goods) AfterSave(tx *gorm.DB) (err error) {
+	log.Println("after save .....")
+	return nil
+}
+
+func (*Goods) BeforeSave(tx *gorm.DB) (err error) {
+	log.Println("before save .....")
+	return nil
 }

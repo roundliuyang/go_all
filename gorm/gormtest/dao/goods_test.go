@@ -31,3 +31,11 @@ func TestFindPageGoods(t *testing.T) {
 func TestExecGoods(t *testing.T) {
 	ExecGoods()
 }
+
+func TestTransactionGoods(t *testing.T) {
+	Transaction()
+}
+
+func TestTransaction3Goods(t *testing.T) {
+	Transaction3()
+}
