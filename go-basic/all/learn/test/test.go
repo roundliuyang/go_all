@@ -1,26 +1,26 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 )
 
-type People interface {
-	Speak(string) string
-}
-
-type Student struct{}
-
-func (stu *Student) Speak(think string) (talk string) {
-	if think == "sb" {
-		talk = "你是个大帅比"
-	} else {
-		talk = "您好"
+func getCircleArea(radius float32) (area float32, err error) {
+	if radius < 0 {
+		// 构建个异常对象
+		err = errors.New("半径不能为负")
+		return
 	}
+	area = 3.14 * radius * radius
 	return
 }
 
 func main() {
-	var peo People = &Student{}
-	think := "bitch"
-	fmt.Println(peo.Speak(think))
+	area, err := getCircleArea(-5)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+
+		fmt.Println(area)
+	}
 }
