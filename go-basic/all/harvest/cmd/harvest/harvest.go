@@ -1,9 +1,9 @@
 package main
 
 import (
-	"all/all/learn/harvest/cfg"
-	"all/all/learn/harvest/pingback"
-	"all/all/learn/harvest/taikang"
+	"all/all/harvest/cfg"
+	pingback2 "all/all/harvest/pingback"
+	"all/all/harvest/taikang"
 	"gitlab.mycool.tv/local/helper"
 	"log"
 	"net/http"
@@ -45,13 +45,13 @@ func pingbackRecordHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type pbHandler struct {
-	analyzers []pingback.Analyzer
+	analyzers []pingback2.Analyzer
 }
 
 // 构造器，惨绝人寰
 func newPbHandler() *pbHandler {
 	h := &pbHandler{
-		analyzers: make([]pingback.Analyzer, 0),
+		analyzers: make([]pingback2.Analyzer, 0),
 	}
 	if cfg.Cfg.Media.Enabled {
 		//todo
@@ -68,7 +68,7 @@ func (h pbHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	defer helper.WriteMsg(w, m)
 
-	pb := pingback.FromRequest(r)
+	pb := pingback2.FromRequest(r)
 	if pb == nil {
 		log.Printf("analyze %s", pb.JSON())
 	}

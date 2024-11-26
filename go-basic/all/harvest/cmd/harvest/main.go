@@ -1,8 +1,8 @@
 package main
 
 import (
-	"all/all/learn/harvest/cfg"
-	"all/all/learn/harvest/taikang"
+	"all/all/harvest/cfg"
+	"all/all/harvest/taikang"
 	"context"
 	"github.com/julienschmidt/httprouter"
 	"log"
