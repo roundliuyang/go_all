@@ -1,10 +1,12 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 func main() {
@@ -19,7 +21,9 @@ func main() {
 	}
 	u.RawQuery = data.Encode() // URL encode
 	fmt.Println(u.String())
-	resp, err := http.Get(u.String())
+
+	client := autoClient(apiUrl)
+	resp, err := client.Get(u.String())
 	if err != nil {
 		fmt.Println("post failed, err:%v\n", err)
 		return
@@ -31,4 +35,21 @@ func main() {
 		return
 	}
 	fmt.Println(string(b))
+}
+
+// autoClient 根据url判断使用HTTPS还是HTTP
+func autoClient(u string) *http.Client {
+	scheme := strings.Split(u, "://")[0]
+
+	if strings.EqualFold(scheme, "https") {
+		return &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			},
+		}
+	}
+
+	return http.DefaultClient
 }
