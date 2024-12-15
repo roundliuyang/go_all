@@ -14,13 +14,28 @@ import (
 // net/http post demo
 
 func main() {
-	url := "http://127.0.0.1:9090/post"
-	data := `{"name": "枯藤", "age": 18}`
+	// POST获取响应
+	apiurl := "http://127.0.0.1:9090/post"
+	data := `{"name": "枯藤 ", "age": 18}`
 	contentType := "application/json"
-	_, err := HTTPPost(url, contentType, data)
+	result, err := HTTPPost(apiurl, contentType, data)
 	if err != nil {
 		fmt.Printf("post failed, err:%v\n", err)
 	}
+	fmt.Println("post results: %s", string(result))
+
+	// HTTPPostForm 示例调用
+	formURL := "http://127.0.0.1:9090/post_form"
+	formData := url.Values{
+		"name": {"枯藤"},
+		"age":  {"18"},
+	}
+	result, err = HTTPPostForm(formURL, formData)
+	if err != nil {
+		fmt.Printf("post form failed, err:%v\n", err)
+		return
+	}
+	fmt.Printf("post form results: %s\n", string(result))
 }
 
 // HTTPPost POST获取响应
