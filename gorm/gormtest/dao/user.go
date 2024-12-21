@@ -14,7 +14,7 @@ type User struct {
 	Username string `gorm:"column:username"`
 	Password string `gorm:"column:password"`
 	//创建时间，时间戳
-	CreateTime  int64 `gorm:"column:createtime"`
+	CreatedAt   time.Time
 	UserProfile UserProfile
 }
 
@@ -32,15 +32,16 @@ func (u UserProfile) TableName() string {
 	return "user_profiles"
 }
 
-// 插入
+// Save
 func Save(user *User) {
-	result := DB.Create(user)
+	result := DB.Save(user)
 	if result.Error != nil {
-		log.Println("insert fail : ", result.Error)
+		log.Println("save fail : ", result.Error)
 	}
 }
 
-// 查询
+// 查询------------------------------------------------------------------------------------------------------
+
 func GetById(id int64) User {
 	var user User
 	err := DB.Where("id=?", id).First(&user).Error
@@ -60,15 +61,34 @@ func GetAll() []User {
 	return users
 }
 
-// 更新
-func UpdateById(id int64) {
-	err := DB.Model(&User{}).Where("id=?", id).Update("username", "lisisi")
-	if err != nil {
-		log.Println("update users  fail : ", err)
-	}
+// 创建---------------------------------------------------------------------------------------------------
+
+func CreateUser(info *User) error {
+	err := DB.Create(&info).Error
+	return err
 }
 
-// 删除
+// 更新----------------------------------------------------------------------------------------------------
+
+// 根据 `struct` 更新属性，只会更新非零值的字段
+func UpdateUser(info User) error {
+	err := DB.Model(&info).Updates(info).Error
+	return err
+}
+
+// 根据map更新属性，只会更新非零值的字段
+func UpdateUserByMap(info User, param map[string]interface{}) error {
+	err := DB.Model(&info).Updates(param).Error
+	return err
+}
+
+func UpdateUserByMap2(info User, param map[string]interface{}) error {
+	err := DB.Model(&info).Where(info).Updates(param).Error
+	return err
+}
+
+// 删除 ----------------------------------------------------------------------------------------------------
+
 func DeleteById(id int64) {
 	err := DB.Where("id=?", id).Delete(&User{})
 	if err != nil {
@@ -76,14 +96,13 @@ func DeleteById(id int64) {
 	}
 }
 
-// 关联查询========================================================
+// 关联查询-----------------------------------------------------------------------------------------------------
 
 func Save2() {
 	db := DB.Session(&gorm.Session{})
 	var user = User{
-		Username:   "ms",
-		Password:   "ms",
-		CreateTime: time.Now().UnixMilli(),
+		Username: "ms",
+		Password: "ms",
 		UserProfile: UserProfile{
 			Sex: 0,
 			Age: 20,
