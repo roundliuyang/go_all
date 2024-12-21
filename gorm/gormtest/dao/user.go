@@ -11,11 +11,18 @@ type User struct {
 	ID int64 // 主键
 	//通过在字段后面的标签说明，定义golang字段和表字段的关系
 	//例如 `gorm:"column:username"` 标签说明含义是: Mysql表的列名（字段名)为username
-	Username string `gorm:"column:username"`
-	Password string `gorm:"column:password"`
+	Username string `gorm:"column:username;default:'ddda'"`
+	Password string `gorm:"column:password;default:'123456789'"`
 	//创建时间，时间戳
 	CreatedAt   time.Time
 	UserProfile UserProfile
+}
+
+type UserV2 struct {
+	ID        int64   // 主键
+	Username  *string `gorm:"column:username;default:'ddda'"`
+	Password  *string `gorm:"column:password;default:'123456789'"`
+	CreatedAt time.Time
 }
 
 type UserProfile struct {
@@ -28,6 +35,11 @@ type UserProfile struct {
 func (u User) TableName() string {
 	return "users"
 }
+
+func (u UserV2) TableName() string {
+	return "users"
+}
+
 func (u UserProfile) TableName() string {
 	return "user_profiles"
 }
@@ -64,6 +76,11 @@ func GetAll() []User {
 // 创建---------------------------------------------------------------------------------------------------
 
 func CreateUser(info *User) error {
+	err := DB.Create(&info).Error
+	return err
+}
+
+func CreateUserV2(info *UserV2) error {
 	err := DB.Create(&info).Error
 	return err
 }
