@@ -25,6 +25,14 @@ type UserV2 struct {
 	CreatedAt time.Time
 }
 
+type UserV3 struct {
+	ID        int64   // 主键
+	Username  *string `gorm:"column:username;default:'ddda'"`
+	Password  *string `gorm:"column:password;default:'123456789'"`
+	CreatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
 type UserProfile struct {
 	ID     int64
 	UserId int64
@@ -38,6 +46,10 @@ func (u User) TableName() string {
 
 func (u UserV2) TableName() string {
 	return "users"
+}
+
+func (u UserV3) TableName() string {
+	return "users2"
 }
 
 func (u UserProfile) TableName() string {
