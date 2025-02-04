@@ -1,16 +1,12 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
-	"github.com/go-kratos/kratos/v2"
 	"github.com/nacos-group/nacos-sdk-go/v2/clients"
 	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
-	"go-frame/api"
 	"go-frame/cfg"
-	"go-frame/knacosregistry"
 	"log"
 	"net"
 	"os"
@@ -24,6 +20,7 @@ var (
 	sconfig *constant.ServerConfig
 	cconfig *constant.ClientConfig
 )
+
 var (
 	Name      = "predis"
 	Version   = "unset"
@@ -35,32 +32,32 @@ func init() {
 	initFlags()
 	loadnacosenv()
 }
+
 func main() {
-	initConfig()
-	nc, e := clients.NewNamingClient(vo.NacosClientParam{
-		ClientConfig: cconfig, ServerConfigs: []constant.ServerConfig{*sconfig},
-	})
-	if e != nil {
-		log.Fatal(e)
-	}
-
-	app := kratos.New(
-		kratos.Name(Name),
-		kratos.Version(Version),
-		kratos.Registrar(knacosregistry.NewRegistry(nc, knacosregistry.WithKind("http"))),
-		kratos.Server(api.NewHttpServer()),
-		kratos.BeforeStop(func(ctx context.Context) error {
-			return nil
-		}),
-	)
-
-	if e := app.Run(); e != nil {
-		log.Fatal(e)
-	}
+	//initConfig()
+	//nc, e := clients.NewNamingClient(vo.NacosClientParam{
+	//	ClientConfig: cconfig, ServerConfigs: []constant.ServerConfig{*sconfig},
+	//})
+	//if e != nil {
+	//	log.Fatal(e)
+	//}
+	//
+	//app := kratos.New(
+	//	kratos.Name(Name),
+	//	kratos.Version(Version),
+	//	kratos.Registrar(knacosregistry.NewRegistry(nc, knacosregistry.WithKind("http"))),
+	//	kratos.Server(api.NewHttpServer()),
+	//	kratos.BeforeStop(func(ctx context.Context) error {
+	//		return nil
+	//	}),
+	//)
+	//
+	//if e := app.Run(); e != nil {
+	//	log.Fatal(e)
+	//}
 }
 
 func loadnacosenv() {
-
 	//addr := os.Getenv("NACOS_ADDR")
 	//username := os.Getenv("NACOS_USERNAME")
 	//password := os.Getenv("NACOS_PASSWORD")
@@ -88,34 +85,32 @@ func loadnacosenv() {
 	sconfig = constant.NewServerConfig(ipaddr, iport)
 }
 
+// 初始化 nacos 客户端配置
 func initConfig() {
 	cc, e := clients.NewConfigClient(vo.NacosClientParam{
 		ClientConfig:  cconfig,
 		ServerConfigs: []constant.ServerConfig{*sconfig},
 	})
 	if e != nil {
-		log.Fatal("init nacos failed!")
-		log.Fatal(cconfig)
 		log.Fatal(e)
 	}
 	p, e := cc.GetConfig(vo.ConfigParam{
-		DataId: "predis.yml",
+		DataId: "predis.example.yml",
 	})
 	if e != nil {
-		log.Fatal("get nacos predis.yml faild!")
 		log.Fatal(e)
 	}
 	cfg.Init(p)
 
 	if cc.ListenConfig(vo.ConfigParam{
-		Group: constant.DEFAULT_GROUP, DataId: "predis.yml",
+		Group: constant.DEFAULT_GROUP, DataId: "predis.example.yml",
 		OnChange: func(namespace, group, dataId, data string) {
 
 			cfg.Init(data)
 			run()
 		},
 	}); e != nil {
-		log.Panicf("watch config err: dataId = predis.yml, err = %s", e)
+		log.Panicf("watch config err: dataId = predis.example.yml, err = %s", e)
 	}
 }
 
@@ -142,5 +137,4 @@ func initFlags() {
 	if *help || logfile == "" {
 		flag.Usage()
 	}
-
 }

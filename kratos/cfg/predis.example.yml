@@ -1,0 +1,14 @@
+predis:
+  # 并发量
+  concurrent: 60
+  # 本地redis配置
+  redis:
+    dsn: redis://:@redis.test.yly.com:6379
+  # 远端redis配置
+  remote:
+    # 接口缓存db
+    ifcdb: 0
+    # 配置缓存db
+    configdb: 3
+    # 远端密码
+    password: 123456
