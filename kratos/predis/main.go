@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"github.com/go-kratos/kratos/v2"
 	"github.com/nacos-group/nacos-sdk-go/v2/clients"
 	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
+	"go-frame/api"
 	"go-frame/cfg"
+	"go-frame/knacosregistry"
 	"log"
 	"net"
 	"os"
@@ -34,27 +38,30 @@ func init() {
 }
 
 func main() {
-	//initConfig()
-	//nc, e := clients.NewNamingClient(vo.NacosClientParam{
-	//	ClientConfig: cconfig, ServerConfigs: []constant.ServerConfig{*sconfig},
-	//})
-	//if e != nil {
-	//	log.Fatal(e)
-	//}
-	//
-	//app := kratos.New(
-	//	kratos.Name(Name),
-	//	kratos.Version(Version),
-	//	kratos.Registrar(knacosregistry.NewRegistry(nc, knacosregistry.WithKind("http"))),
-	//	kratos.Server(api.NewHttpServer()),
-	//	kratos.BeforeStop(func(ctx context.Context) error {
-	//		return nil
-	//	}),
-	//)
-	//
-	//if e := app.Run(); e != nil {
-	//	log.Fatal(e)
-	//}
+	initConfig()
+
+	// 创建服务发现客户端（服务发现）
+	nc, e := clients.NewNamingClient(vo.NacosClientParam{
+		ClientConfig: cconfig, ServerConfigs: []constant.ServerConfig{*sconfig},
+	})
+	if e != nil {
+		log.Fatal(e)
+	}
+
+	app := kratos.New(
+		kratos.Name(Name),
+		kratos.Version(Version),
+		// 服务注册与发现
+		kratos.Registrar(knacosregistry.NewRegistry(nc, knacosregistry.WithKind("http"))),
+		kratos.Server(api.NewHttpServer()),
+		kratos.BeforeStop(func(ctx context.Context) error {
+			return nil
+		}),
+	)
+
+	if e := app.Run(); e != nil {
+		log.Fatal(e)
+	}
 }
 
 func loadnacosenv() {
@@ -68,6 +75,7 @@ func loadnacosenv() {
 	password := "nacos"
 	namespace := "idc"
 
+	// 创建clientConfig
 	cconfig = constant.NewClientConfig(func(cc *constant.ClientConfig) {
 		cc.NamespaceId = namespace
 		cc.Username = username
@@ -75,18 +83,18 @@ func loadnacosenv() {
 	})
 	ipaddr, port, e := net.SplitHostPort(addr)
 	if e != nil {
-		// todo 区别
 		log.Panicf("parse NACOS_ADDR err: %s", e)
 	}
 	iport, e := strconv.ParseUint(port, 10, 64)
 	if e != nil {
 		log.Panicf("parse port err: %s", e)
 	}
+	// serverConfig
 	sconfig = constant.NewServerConfig(ipaddr, iport)
 }
 
-// 初始化 nacos 客户端配置
 func initConfig() {
+	// 创建动态配置客户端（动态配置）
 	cc, e := clients.NewConfigClient(vo.NacosClientParam{
 		ClientConfig:  cconfig,
 		ServerConfigs: []constant.ServerConfig{*sconfig},
@@ -95,7 +103,7 @@ func initConfig() {
 		log.Fatal(e)
 	}
 	p, e := cc.GetConfig(vo.ConfigParam{
-		DataId: "predis.example.yml",
+		DataId: "predis.yml",
 	})
 	if e != nil {
 		log.Fatal(e)
@@ -103,7 +111,7 @@ func initConfig() {
 	cfg.Init(p)
 
 	if cc.ListenConfig(vo.ConfigParam{
-		Group: constant.DEFAULT_GROUP, DataId: "predis.example.yml",
+		Group: constant.DEFAULT_GROUP, DataId: "predis.yml",
 		OnChange: func(namespace, group, dataId, data string) {
 
 			cfg.Init(data)
