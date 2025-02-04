@@ -3,14 +3,12 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"gorm/gormtest/dao"
-	"time"
 )
 
 func SaveUser(c *gin.Context) {
 	user := &dao.User{
-		Username:   "zhangsan",
-		Password:   "123456",
-		CreateTime: time.Now().UnixMilli(),
+		Username: "zhangsan",
+		Password: "123456",
 	}
 	dao.Save(user)
 	c.JSON(200, user)
@@ -29,7 +27,7 @@ func GetAll(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	dao.UpdateById(1)
+	//dao.UpdateById(1)
 	user := dao.GetById(1)
 	c.JSON(200, user)
 }
