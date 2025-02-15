@@ -1,0 +1,2 @@
+{"level":"info","ts":1739283342.323961,"msg":"demo1:","app":"start ok","major version":2}
+{"level":"info","ts":1739283342.323961,"msg":"call foo","url":"https://tonybai.com","attempt":3}
