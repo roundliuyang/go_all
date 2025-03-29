@@ -50,7 +50,7 @@ func TestSingleColumn(t *testing.T) {
 }
 
 // 更新多个列
-// 注意 使用 struct 更新时, GORM 将只更新非零值字段。 你可能想用 map 来更新属性，或者使用 Select 声明字段来更新
+// 注意 使用 struct 更新时, GORM 将只更新非零值字段。 你可能想用 maps 来更新属性，或者使用 Select 声明字段来更新
 func TestUpdateUser(t *testing.T) {
 	user := User{
 		ID:       7,

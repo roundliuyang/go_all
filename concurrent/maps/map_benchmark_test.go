@@ -45,17 +45,17 @@ func benchmarkMap(b *testing.B, hm Map) {
 }
 
 func BenchmarkSyncmap(b *testing.B) {
-	b.Run("map with RWLock", func(b *testing.B) {
+	b.Run("maps with RWLock", func(b *testing.B) {
 		hm := CreateRWLockMap()
 		benchmarkMap(b, hm)
 	})
 
-	b.Run("sync.map", func(b *testing.B) {
+	b.Run("sync.maps", func(b *testing.B) {
 		hm := CreateSyncMapBenchmarkAdapter()
 		benchmarkMap(b, hm)
 	})
 
-	b.Run("concurrent map", func(b *testing.B) {
+	b.Run("concurrent maps", func(b *testing.B) {
 		superman := CreateConcurrentMapBenchmarkAdapter(199)
 		benchmarkMap(b, superman)
 	})

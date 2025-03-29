@@ -8,13 +8,13 @@ import (
 
 /*
 声明服务端
-map 的键是 string 类型，表示函数的名称；值是 reflect.Value 类型，表示通过反射得到的函数。
+maps 的键是 string 类型，表示函数的名称；值是 reflect.Value 类型，表示通过反射得到的函数。
 reflect.Value 是 Go 的反射包中的一个类型，它可以用来动态调用函数、修改值等。通过这种方式，可以将一组函数注册到服务端，然后在请求时动态调用。
 */
 type Server struct {
 	// 地址
 	addr string
-	// map 用于维护关系的
+	// maps 用于维护关系的
 	funcs map[string]reflect.Value
 }
 
