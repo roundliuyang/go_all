@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
-	"grpc/demo/proto"
+	"grpc/proto"
+	//"grpc/demo/proto"
 )
 
 // 1.连接服务端

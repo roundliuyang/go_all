@@ -4,6 +4,7 @@ import (
 	"context"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"log"
+	"time"
 )
 
 type EtcdRegister struct {
@@ -67,6 +68,28 @@ func (s *EtcdRegister) Close() error {
 	s.etcdCli.Revoke(s.ctx, s.leaseId)
 
 	return s.etcdCli.Close()
+}
+
+func NewEtcdRegister() (*EtcdRegister, error) {
+
+	client, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"127.0.0.1:2379"},
+		DialTimeout: 5 * time.Second,
+	})
+
+	if err != nil {
+		log.Printf("new etcd client failed,error %v \n", err)
+		return nil, err
+	}
+
+	ctx, cancelFunc := context.WithCancel(context.Background())
+
+	svr := &EtcdRegister{
+		etcdCli: client,
+		ctx:     ctx,
+		cancel:  cancelFunc,
+	}
+	return svr, nil
 }
 
 // 注册服务

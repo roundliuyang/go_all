@@ -8,7 +8,7 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
-	"grpc/demo/proto"
+	"grpc/proto"
 	"net"
 )
 

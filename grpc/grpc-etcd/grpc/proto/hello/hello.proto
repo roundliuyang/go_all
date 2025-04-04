@@ -1,0 +1,31 @@
+syntax = "proto3";
+package hello;
+
+option go_package = "/hello";
+
+message HelloRequest {
+  string name = 1;
+  int32 age = 2;
+}
+
+
+message HelloResponse {
+  int32 code = 1;
+  string msg = 2;
+}
+
+
+service HelloService {
+  // 一元 RPC
+  rpc SayHello(HelloRequest) returns (HelloResponse){}
+
+  // 服务端流式RPC
+  rpc LotsOfReplies(HelloRequest) returns (stream HelloResponse){}
+
+  // 客户端流式RPC
+  rpc LotsOfGreetings(stream HelloRequest) returns (HelloResponse){}
+
+  // 双向流式RPC
+  rpc BidiHello(stream HelloRequest) returns (stream HelloResponse){}
+
+}
