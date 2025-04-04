@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
-	pb "grpc/proto" //注意这个路径
+	"grpc/demo/proto"
 )
 
 // 1.连接服务端
@@ -19,9 +19,9 @@ func main() {
 	}
 	defer conn.Close()
 	// 2. 实例化gRPC客户端
-	client := pb.NewUserInfoServiceClient(conn)
+	client := proto.NewUserInfoServiceClient(conn)
 	// 3.组装请求参数
-	req := new(pb.UserRequest)
+	req := new(proto.UserRequest)
 	req.Name = "zs"
 	// 4. 调用接口
 	response, err := client.GetUserInfo(context.Background(), req)
