@@ -2,7 +2,10 @@ package main
 
 import (
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"sgrpc/etcd/register"
+	"sgrpc/grpc/handler"
 	"sgrpc/grpc/proto/hello"
 	"sgrpc/grpc/service"
 
@@ -11,7 +14,12 @@ import (
 )
 
 func main() {
-	server := grpc.NewServer()
+	server := grpc.NewServer(grpc.StatsHandler(&handler.StatsHandler{}), grpc.UnknownServiceHandler(handler.UnknownServiceHandler))
+	// 健康检查
+	healthServer := health.NewServer()
+	healthServer.SetServingStatus("grpc.health.v1.Health", healthpb.HealthCheckResponse_SERVING)
+	healthpb.RegisterHealthServer(server, healthServer)
+
 	helloService := new(service.HelloService)
 	hello.RegisterHelloServiceServer(server, helloService)
 

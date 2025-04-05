@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
 	"google.golang.org/grpc/credentials/insecure"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/resolver"
 	"io"
 	"sgrpc/etcd/discover"
@@ -28,6 +29,22 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	// 调用健康检查
+	healthClient := healthpb.NewHealthClient(conn)
+	ir := &healthpb.HealthCheckRequest{
+		Service: "grpc.health.v1.Health",
+	}
+
+	// 调用Check检查服务是否正常
+	deadline, cancelFunc := context.WithDeadline(context.Background(), time.Now().Add(5*time.Second))
+	healthCheckResponse, err := healthClient.Check(deadline, ir)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(healthCheckResponse)
+	cancelFunc()
 
 	helloServiceClient := hello.NewHelloServiceClient(conn)
 
