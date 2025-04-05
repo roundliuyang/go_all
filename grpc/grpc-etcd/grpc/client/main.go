@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/resolver"
 	"io"
 	"sgrpc/etcd/discover"
+	"sgrpc/grpc/lb"
 	"sgrpc/grpc/proto/hello"
 	"strconv"
 	"time"
@@ -20,7 +21,10 @@ func main() {
 	resolver.Register(etcdResolverBuilder)
 
 	// 使用自带的DNS解析器和负载均衡实现方式
-	conn, err := grpc.Dial("etcd:///", grpc.WithBalancerName(roundrobin.Name), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("etcd:///",
+		grpc.WithBalancerName(roundrobin.Name),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBalancerName(lb.WEIGHT_LOAD_BALANCE))
 	if err != nil {
 		panic(err)
 	}

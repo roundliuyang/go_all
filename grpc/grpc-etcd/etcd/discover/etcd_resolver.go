@@ -3,8 +3,10 @@ package discover
 import (
 	"context"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/resolver"
 	"log"
+	"sgrpc/grpc/lb"
 	"sync"
 )
 
@@ -62,13 +64,27 @@ func (s *etcdResolver) del(key []byte) {
 
 func (e *etcdResolver) updateState() {
 	var addrList resolver.State
+
+	// 模拟权重设置
+	log.Println("etcdResolver updateSate called...")
+	var i = 1
 	e.ipPool.Range(func(k, v interface{}) bool {
 		tA, ok := v.(string)
 		if !ok {
 			return false
 		}
 		log.Printf("conn.UpdateState key[%v];val[%v]\n", k, v)
-		addrList.Addresses = append(addrList.Addresses, resolver.Address{Addr: tA})
+
+		// 模拟设置权重
+		addr := resolver.Address{
+			BalancerAttributes: attributes.New(lb.WeightAttributeKey{}, lb.WeightAddrInfo{
+				Weight: i,
+			}),
+			Addr: tA,
+		}
+
+		addrList.Addresses = append(addrList.Addresses, addr)
+		i++
 		return true
 	})
 

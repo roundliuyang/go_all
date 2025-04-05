@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+/*
+客户端首先需要实现接口resolver.Resolver，其中方法Build()用于创建一个etcd解析器，grpc.Dial()会同步调用该方法，
+解析器需要根据key前缀监听etcd中服务地址列表的变化并更新本地列表watch。然后注册解析器，创建gRPC句柄，使用轮询负载均衡请求服务。
+*/
 type etcdResolverBuilder struct {
 	etcdClient *clientv3.Client
 }
