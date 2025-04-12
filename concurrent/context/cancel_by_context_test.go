@@ -7,12 +7,26 @@ import (
 	"time"
 )
 
-func isCancelled(ctx context.Context) bool {
+/*
+使用 Context 同步信号
+*/
+func TestWithTimeout(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+
+	go handle(ctx, 1500*time.Millisecond)
 	select {
 	case <-ctx.Done():
-		return true
-	default:
-		return false
+		fmt.Println("main", ctx.Err())
+	}
+}
+
+func handle(ctx context.Context, duration time.Duration) {
+	select {
+	case <-ctx.Done():
+		fmt.Println("handle", ctx.Err())
+	case <-time.After(duration):
+		fmt.Println("process request with", duration)
 	}
 }
 
@@ -36,4 +50,13 @@ func TestCancel(t *testing.T) {
 	}
 	cancel()
 	time.Sleep(time.Second * 1)
+}
+
+func isCancelled(ctx context.Context) bool {
+	select {
+	case <-ctx.Done():
+		return true
+	default:
+		return false
+	}
 }
