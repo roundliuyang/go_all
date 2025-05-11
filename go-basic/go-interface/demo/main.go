@@ -2,6 +2,12 @@ package main
 
 import "fmt"
 
+type TestStruct struct{}
+
+func NilOrNot(v interface{}) bool {
+	return v == nil
+}
+
 type Duck interface {
 	Quack()
 }
@@ -31,4 +37,8 @@ func main() {
 	var d2 Duck = &Cat{}
 	//d1.Quack()
 	d2.Quack()
+
+	var s *TestStruct
+	fmt.Println(s == nil)    // #=> true
+	fmt.Println(NilOrNot(s)) // #=> false
 }
