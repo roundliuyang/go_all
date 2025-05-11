@@ -7,9 +7,51 @@ import (
 )
 
 func TestTypeAndValue(t *testing.T) {
-	var f int64 = 10
-	t.Log(reflect.TypeOf(f), reflect.ValueOf(f))
-	t.Log(reflect.ValueOf(f).Type())
+	// 第一定律
+	var age interface{} = 25
+
+	fmt.Printf("原始接口变量的类型为 %T，值为 %v \n", age, age)
+
+	tt := reflect.TypeOf(age)
+	v := reflect.ValueOf(age)
+
+	// 从接口变量到反射对象
+	fmt.Printf("从接口变量到反射对象：Type对象的类型为 %T \n", tt)
+	fmt.Printf("从接口变量到反射对象：Value对象的类型为 %T \n", v)
+
+	// 第二定律
+	// 从反射对象到接口变量
+	i := v.Interface()
+	fmt.Printf("从反射对象到接口变量：新对象的类型为 %T 值为 %v \n", i, i)
+
+	// 当然了，最后转换后的对象，静态类型为 interface{} ，如果要转成最初的原始类型，需要再类型断言转换一下
+	i = v.Interface().(int)
+	fmt.Printf("从反射对象到接口变量：新对象的类型为 %T 值为 %v \n", i, i)
+}
+
+func TestSettable(t *testing.T) {
+	//var name string = "Go编程时光"
+	//
+	//v := reflect.ValueOf(name)
+	//fmt.Println("可写性为:", v.CanSet())
+
+	var name string = "Go编程时光"
+	v1 := reflect.ValueOf(&name)
+	fmt.Println("v1 可写性为:", v1.CanSet())
+
+	v2 := v1.Elem()
+	fmt.Println("v2 可写性为:", v2.CanSet())
+}
+
+func TestSettable2(t *testing.T) {
+	var name string = "Go编程时光"
+	fmt.Println("真实世界里 name 的原始值为：", name)
+
+	v1 := reflect.ValueOf(&name)
+	v2 := v1.Elem()
+
+	v2.SetString("Python编程时光")
+	fmt.Println("通过反射对象进行更新后，真实世界里 name 变为：", name)
 }
 
 func CheckType(v interface{}) {
