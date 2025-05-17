@@ -5,16 +5,21 @@ import (
 	"flag"
 	"fmt"
 	"github.com/go-kratos/kratos/v2"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/nacos-group/nacos-sdk-go/v2/clients"
 	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
-	"go-frame/api"
 	"go-frame/cfg"
 	"go-frame/knacosregistry"
+	"go-frame/proto"
+	"go-frame/service"
+	grpcstd "google.golang.org/grpc"
 	"log"
 	"net"
 	"os"
 	"strconv"
+	"time"
 )
 
 var (
@@ -48,16 +53,39 @@ func main() {
 		log.Fatal(e)
 	}
 
+	var userService = service.UserInfoService{}
+
+	// 实例化gRPC
+	grpcSrv := grpc.NewServer(
+		grpc.Address(":9000"),
+		grpc.Middleware(
+			recovery.Recovery(),
+		),
+	)
+	//// 在gRPC上注册微服务
+	//proto.RegisterUserInfoServiceServer(grpcSrv, &userService)
+
 	app := kratos.New(
 		kratos.Name(Name),
 		kratos.Version(Version),
 		// 服务注册与发现
-		kratos.Registrar(knacosregistry.NewRegistry(nc, knacosregistry.WithKind("http"))),
-		kratos.Server(api.NewHttpServer()),
+		kratos.Registrar(knacosregistry.NewRegistry(nc, knacosregistry.WithKind("grpc"))),
+		kratos.Server(
+			//api.NewHttpServer(),
+			grpcSrv,
+		),
 		kratos.BeforeStop(func(ctx context.Context) error {
 			return nil
 		}),
 	)
+	// 在gRPC上注册微服务
+	proto.RegisterUserInfoServiceServer(grpcSrv, &userService)
+
+	// 客户端调用 gRPC 测试
+	go func() {
+		time.Sleep(2 * time.Second)
+		callUserInfo()
+	}()
 
 	if e := app.Run(); e != nil {
 		log.Fatal(e)
@@ -70,7 +98,7 @@ func loadnacosenv() {
 	//password := os.Getenv("NACOS_PASSWORD")
 	//namespace := os.Getenv("NACOS_NS")
 
-	addr := "172.19.171.168:8848"
+	addr := "172.26.118.30:8848"
 	username := "nacos"
 	password := "nacos"
 	namespace := "idc"
@@ -145,4 +173,25 @@ func initFlags() {
 	if *help || logfile == "" {
 		flag.Usage()
 	}
+}
+
+func callUserInfo() {
+	conn, err := grpcstd.Dial("127.0.0.1:9000", grpcstd.WithInsecure())
+	if err != nil {
+		log.Printf("Failed to connect to gRPC server: %v", err)
+		return
+	}
+	defer conn.Close()
+
+	client := proto.NewUserInfoServiceClient(conn)
+
+	req := new(proto.UserRequest)
+	req.Name = "zs"
+	resp, err := client.GetUserInfo(context.Background(), req)
+	if err != nil {
+		log.Printf("Call GetUserInfo failed: %v", err)
+		return
+	}
+
+	log.Printf("Call GetUserInfo success: %+v", resp)
 }
