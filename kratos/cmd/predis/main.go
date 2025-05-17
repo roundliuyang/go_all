@@ -62,8 +62,8 @@ func main() {
 			recovery.Recovery(),
 		),
 	)
-	//// 在gRPC上注册微服务
-	//proto.RegisterUserInfoServiceServer(grpcSrv, &userService)
+	// 在gRPC上注册微服务
+	proto.RegisterUserInfoServiceServer(grpcSrv, &userService)
 
 	app := kratos.New(
 		kratos.Name(Name),
@@ -78,8 +78,6 @@ func main() {
 			return nil
 		}),
 	)
-	// 在gRPC上注册微服务
-	proto.RegisterUserInfoServiceServer(grpcSrv, &userService)
 
 	// 客户端调用 gRPC 测试
 	go func() {
