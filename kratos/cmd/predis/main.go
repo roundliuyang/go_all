@@ -5,7 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/go-kratos/kratos/v2"
+	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/nacos-group/nacos-sdk-go/v2/clients"
 	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
@@ -14,6 +16,7 @@ import (
 	"go-frame/knacosregistry"
 	"go-frame/proto"
 	"go-frame/service"
+	"go-frame/tracer"
 	grpcstd "google.golang.org/grpc"
 	"log"
 	"net"
@@ -55,11 +58,20 @@ func main() {
 
 	var userService = service.UserInfoService{}
 
+	tp, err := tracer.TracerProvider("http://172.26.118.30:14268/api/traces") // tracer provider
+	if err != nil {
+		log.Printf("Call TracerProvider failed: %v", err)
+		return
+	}
+
 	// 实例化gRPC
 	grpcSrv := grpc.NewServer(
 		grpc.Address(":9000"),
 		grpc.Middleware(
-			recovery.Recovery(),
+			middleware.Chain(
+				recovery.Recovery(),
+				tracing.Server(tracing.WithTracerProvider(tp)), //设置trace，传入 trace provider
+			),
 		),
 	)
 	// 在gRPC上注册微服务
