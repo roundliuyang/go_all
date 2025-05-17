@@ -20,9 +20,11 @@ func main() {
 		NamespaceId:         "idc",
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
-		LogLevel:            "debug",
-		Username:            "nacos",
-		Password:            "nacos",
+		//LogDir:              "/tmp/nacos/log",
+		//CacheDir:            "/tmp/nacos/cache",
+		LogLevel: "debug",
+		Username: "nacos",
+		Password: "nacos",
 	}
 
 	cli, err := clients.NewNamingClient(
