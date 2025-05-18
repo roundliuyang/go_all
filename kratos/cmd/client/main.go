@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/go-kratos/kratos/contrib/registry/nacos/v2"
+	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
@@ -42,6 +43,9 @@ func main() {
 		context.Background(),
 		grpc.WithEndpoint("discovery:///kratos.service.predis"),
 		grpc.WithDiscovery(nacos.New(cli)),
+		grpc.WithMiddleware( // ✅ tracing 客户端中间件
+			tracing.Client(),
+		),
 	)
 	client := proto.NewUserInfoServiceClient(conn)
 	if err != nil {

@@ -20,7 +20,7 @@ func NewUserInfoService(logger klog.Logger) *UserInfoService {
 
 // 实现方法
 func (s *UserInfoService) GetUserInfo(ctx context.Context, req *proto.UserRequest) (resp *proto.UserResponse, err error) {
-	s.log.Infof("GetUserInfo received, request: %+v", req)
+	s.log.WithContext(ctx).Infof("request: %+v", req)
 	// 通过用户名查询用户信息
 	name := req.Name
 	// 数据里查用户信息
