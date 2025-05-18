@@ -8,28 +8,39 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
 )
 
-var (
-	Name    = "user"
-	Version = "v1.0.0"
-	Env     = "development"
-)
+type Conf struct {
+	Name string
+	Env  string
+	Ver  string
+	Url  string
+}
 
-func TracerProvider(url string) (*tracesdk.TracerProvider, error) {
-	// create the jaeger exporter
-	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
+func NewConf(name, env, ver, url string) *Conf {
+	return &Conf{
+		Name: name,
+		Env:  env,
+		Ver:  ver,
+		Url:  url,
+	}
+}
+
+func (c *Conf) TracerProvider() (*tracesdk.TracerProvider, error) {
+	exp, err := jaeger.New(
+		jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(c.Url)),
+	)
 	if err != nil {
 		return nil, err
 	}
+
 	tp := tracesdk.NewTracerProvider(
 		tracesdk.WithSampler(tracesdk.AlwaysSample()),
-		// always be sure to batch in production
 		tracesdk.WithBatcher(exp),
 		tracesdk.WithResource(
 			resource.NewWithAttributes(
 				semconv.SchemaURL,
-				semconv.ServiceNameKey.String(Name),
-				attribute.String("enviroment", Env),
-				attribute.String("version", Version),
+				semconv.ServiceNameKey.String(c.Name),
+				attribute.String("env", c.Env),
+				attribute.String("ver", c.Ver),
 			)),
 	)
 	return tp, nil

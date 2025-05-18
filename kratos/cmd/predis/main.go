@@ -12,11 +12,13 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/v2/clients"
 	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
+	"go-frame/api"
 	"go-frame/cfg"
 	"go-frame/knacosregistry"
 	"go-frame/proto"
 	"go-frame/service"
 	"go-frame/tracer"
+	"go.opentelemetry.io/otel"
 	grpcstd "google.golang.org/grpc"
 	"log"
 	"net"
@@ -34,10 +36,10 @@ var (
 )
 
 var (
-	Name      = "predis"
-	Version   = "unset"
-	GitCommit = "unset"
-	BuildDate = "unset"
+	Name    = "predis"
+	Version = "unset"
+
+	id, _ = os.Hostname()
 )
 
 func init() {
@@ -47,6 +49,15 @@ func init() {
 
 func main() {
 	initConfig()
+
+	// 配置，启动链路追踪
+	url := "http://172.26.118.30:14268/api/traces"
+	Name = "kratos.service.predis"
+	id = "kratos.id.user.1"
+	Version = "test-V0.0.1"
+	traceconf := tracer.NewConf(Name, id, Version, url)
+	tp, _ := traceconf.TracerProvider()
+	otel.SetTracerProvider(tp) // 为全局链路追踪
 
 	// 创建服务发现客户端（服务发现）
 	nc, e := clients.NewNamingClient(vo.NacosClientParam{
@@ -58,19 +69,13 @@ func main() {
 
 	var userService = service.UserInfoService{}
 
-	tp, err := tracer.TracerProvider("http://172.26.118.30:14268/api/traces") // tracer provider
-	if err != nil {
-		log.Printf("Call TracerProvider failed: %v", err)
-		return
-	}
-
 	// 实例化gRPC
 	grpcSrv := grpc.NewServer(
 		grpc.Address(":9000"),
 		grpc.Middleware(
 			middleware.Chain(
 				recovery.Recovery(),
-				tracing.Server(tracing.WithTracerProvider(tp)), //设置trace，传入 trace provider
+				tracing.Server(), //设置trace
 			),
 		),
 	)
@@ -83,7 +88,7 @@ func main() {
 		// 服务注册与发现
 		kratos.Registrar(knacosregistry.NewRegistry(nc, knacosregistry.WithKind("grpc"))),
 		kratos.Server(
-			//api.NewHttpServer(),
+			api.NewHttpServer(),
 			grpcSrv,
 		),
 		kratos.BeforeStop(func(ctx context.Context) error {
@@ -163,8 +168,6 @@ func initConfig() {
 func run() {
 	log.Printf("Name:       predis")
 	log.Printf("Version:    %s", Version)
-	log.Printf("Commit:     %s", GitCommit)
-	log.Printf("Build Date: %s", BuildDate)
 	log.Printf("Config: 	%+v", cfg.Get())
 }
 
