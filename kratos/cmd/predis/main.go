@@ -24,7 +24,6 @@ import (
 	"net"
 	"os"
 	"strconv"
-	"time"
 )
 
 var (
@@ -106,12 +105,6 @@ func main() {
 			return nil
 		}),
 	)
-
-	// 客户端调用 gRPC 测试
-	go func() {
-		time.Sleep(2 * time.Second)
-		//callUserInfo()
-	}()
 
 	if e := app.Run(); e != nil {
 		log.Fatal(e)
@@ -198,24 +191,3 @@ func initFlags() {
 		flag.Usage()
 	}
 }
-
-//func callUserInfo() {
-//	conn, err := grpcstd.Dial("127.0.0.1:9000", grpcstd.WithInsecure())
-//	if err != nil {
-//		log.Printf("Failed to connect to gRPC server: %v", err)
-//		return
-//	}
-//	defer conn.Close()
-//
-//	client := proto.NewUserInfoServiceClient(conn)
-//
-//	req := new(proto.UserRequest)
-//	req.Name = "zs"
-//	resp, err := client.GetUserInfo(context.Background(), req)
-//	if err != nil {
-//		log.Printf("Call GetUserInfo failed: %v", err)
-//		return
-//	}
-//
-//	log.Printf("Call GetUserInfo success: %+v", resp)
-//}
