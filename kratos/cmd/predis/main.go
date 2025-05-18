@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/go-kratos/kratos/v2"
+	klog "github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
@@ -19,7 +20,6 @@ import (
 	"go-frame/service"
 	"go-frame/tracer"
 	"go.opentelemetry.io/otel"
-	grpcstd "google.golang.org/grpc"
 	"log"
 	"net"
 	"os"
@@ -59,6 +59,16 @@ func main() {
 	tp, _ := traceconf.TracerProvider()
 	otel.SetTracerProvider(tp) // 为全局链路追踪
 
+	logger := klog.With(klog.NewStdLogger(os.Stdout),
+		"ts", klog.DefaultTimestamp,
+		"caller", klog.DefaultCaller,
+		"service.id", id,
+		"service.name", Name,
+		"service.version", Version,
+		"trace.id", tracing.TraceID(),
+		"span.id", tracing.SpanID(),
+	)
+
 	// 创建服务发现客户端（服务发现）
 	nc, e := clients.NewNamingClient(vo.NacosClientParam{
 		ClientConfig: cconfig, ServerConfigs: []constant.ServerConfig{*sconfig},
@@ -67,7 +77,7 @@ func main() {
 		log.Fatal(e)
 	}
 
-	var userService = service.UserInfoService{}
+	userService := service.NewUserInfoService(logger)
 
 	// 实例化gRPC
 	grpcSrv := grpc.NewServer(
@@ -80,13 +90,14 @@ func main() {
 		),
 	)
 	// 在gRPC上注册微服务
-	proto.RegisterUserInfoServiceServer(grpcSrv, &userService)
+	proto.RegisterUserInfoServiceServer(grpcSrv, userService)
 
 	app := kratos.New(
 		kratos.Name(Name),
 		kratos.Version(Version),
 		// 服务注册与发现
 		kratos.Registrar(knacosregistry.NewRegistry(nc, knacosregistry.WithKind("grpc"))),
+		kratos.Logger(logger),
 		kratos.Server(
 			api.NewHttpServer(),
 			grpcSrv,
@@ -99,7 +110,7 @@ func main() {
 	// 客户端调用 gRPC 测试
 	go func() {
 		time.Sleep(2 * time.Second)
-		callUserInfo()
+		//callUserInfo()
 	}()
 
 	if e := app.Run(); e != nil {
@@ -188,23 +199,23 @@ func initFlags() {
 	}
 }
 
-func callUserInfo() {
-	conn, err := grpcstd.Dial("127.0.0.1:9000", grpcstd.WithInsecure())
-	if err != nil {
-		log.Printf("Failed to connect to gRPC server: %v", err)
-		return
-	}
-	defer conn.Close()
-
-	client := proto.NewUserInfoServiceClient(conn)
-
-	req := new(proto.UserRequest)
-	req.Name = "zs"
-	resp, err := client.GetUserInfo(context.Background(), req)
-	if err != nil {
-		log.Printf("Call GetUserInfo failed: %v", err)
-		return
-	}
-
-	log.Printf("Call GetUserInfo success: %+v", resp)
-}
+//func callUserInfo() {
+//	conn, err := grpcstd.Dial("127.0.0.1:9000", grpcstd.WithInsecure())
+//	if err != nil {
+//		log.Printf("Failed to connect to gRPC server: %v", err)
+//		return
+//	}
+//	defer conn.Close()
+//
+//	client := proto.NewUserInfoServiceClient(conn)
+//
+//	req := new(proto.UserRequest)
+//	req.Name = "zs"
+//	resp, err := client.GetUserInfo(context.Background(), req)
+//	if err != nil {
+//		log.Printf("Call GetUserInfo failed: %v", err)
+//		return
+//	}
+//
+//	log.Printf("Call GetUserInfo success: %+v", resp)
+//}

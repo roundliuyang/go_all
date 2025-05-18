@@ -40,7 +40,7 @@ func main() {
 	// 构造 gRPC 客户端连接，通过 Nacos 自动发现服务地址
 	conn, err := grpc.DialInsecure(
 		context.Background(),
-		grpc.WithEndpoint("discovery:///predis"),
+		grpc.WithEndpoint("discovery:///kratos.service.predis"),
 		grpc.WithDiscovery(nacos.New(cli)),
 	)
 	client := proto.NewUserInfoServiceClient(conn)
