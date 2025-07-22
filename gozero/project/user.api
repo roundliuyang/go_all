@@ -12,12 +12,14 @@ type LoginReq {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+
 type LoginResp {
 	Token string `json:"token"`
 }
+
 @server (
 	//代表当前service的代码会放在account目录下
-	//这里注意 冒汗要紧贴着key
+	//这里注意 冒号要紧贴着key
 	group: account
 	//路由前缀
 	prefix: v1
@@ -27,6 +29,8 @@ service user-api {
 	//handler中的函数名称
 	@handler register
 	post /user/register (RegisterReq) returns (RegisterResp)
+
 	@handler login
 	post /user/login (LoginReq) returns (LoginResp)
 }
+
