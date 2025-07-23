@@ -2,8 +2,8 @@ package account
 
 import (
 	"context"
-	"errors"
 	"time"
+	"user/biz"
 	"user/internal/user"
 
 	"user/internal/svc"
@@ -32,11 +32,11 @@ func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.RegisterRe
 	u, err := userModel.FindByUsername(l.ctx, req.Username)
 	if err != nil {
 		l.Logger.Error("Register FindByUsername err: ", err)
-		return nil, err
+		return nil, biz.DBError
 	}
 	if u != nil {
 		//代表已经注册
-		return nil, errors.New("此用户名已经注册")
+		return nil, biz.AlreadyRegister
 	}
 	_, err = userModel.Insert(l.ctx, &user.User{
 		Username:      req.Username,
@@ -47,6 +47,5 @@ func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.RegisterRe
 	if err != nil {
 		return nil, err
 	}
-	return
 	return
 }
