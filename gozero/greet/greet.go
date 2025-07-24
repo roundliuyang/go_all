@@ -26,9 +26,11 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
+		// 注册 Greet 服务到 gRPC 服务器中。server.NewGreetServer(ctx) 创建一个新的 GreetServer 实例，它通常包含了业务逻辑，负责处理客户端的 RPC 请求
 		greet.RegisterGreetServer(grpcServer, server.NewGreetServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
+			// 注册反射服务，在gRPC中，反射是一种机制，允许客户端在不知道服务定义（即.proto文件）的情况下查询服务端上的gRPC服务信息。
 			reflection.Register(grpcServer)
 		}
 	})
