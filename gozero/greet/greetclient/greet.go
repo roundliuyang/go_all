@@ -6,7 +6,6 @@ package greetclient
 
 import (
 	"context"
-
 	"greet/greet"
 
 	"github.com/zeromicro/go-zero/zrpc"
