@@ -6,6 +6,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"web3/config"
 	"web3/transaction"
@@ -117,4 +119,73 @@ func (bc *BlockChain) AddNode(urlAddr string) error {
 	s := fmt.Sprintf("%s://%s:%s", l.Scheme, l.Hostname(), l.Port())
 	bc.Nodes[s] = struct{}{}
 	return nil
+}
+
+type ParseBlock struct {
+	BlockList []Block `json:"blockList"`
+	Length    int     `json:"length"`
+}
+
+func (bc *BlockChain) Consensus() bool {
+	nodes := bc.Nodes
+	selfBlockLength := len(bc.BlockList)
+	newBlockList := make([]Block, 0)
+	for k, _ := range nodes {
+		url := fmt.Sprintf("%s/show/chain", k)
+		resp, err := http.Get(url)
+		if err != nil {
+			fmt.Println(err)
+			// TODO 做自己的业务
+			return false
+		}
+		if resp.StatusCode == http.StatusOK {
+			var temp ParseBlock
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Println(err)
+				// TODO 做自己的业务
+				return false
+			}
+			r := string(body)
+			fmt.Println("r@@@", r)
+			err = json.Unmarshal([]byte(r), &temp)
+			if err != nil {
+				fmt.Println(err)
+				// TODO 做自己的业务
+				return false
+			}
+			templength := len(temp.BlockList)
+			if templength > selfBlockLength && bc.ValidateChain() {
+				selfBlockLength = templength
+				newBlockList = temp.BlockList
+			}
+		}
+		resp.Body.Close()
+	}
+	if len(newBlockList) > 0 {
+		bc.BlockList = newBlockList
+		return true
+	} else {
+		return false
+	}
+}
+
+func (bc *BlockChain) ValidateChain() bool {
+	curIndex := 1
+	for curIndex < len(bc.BlockList) {
+		b := bc.BlockList[curIndex]
+		tempHash, err := bc.Hash(bc.LastBlock)
+		if err != nil {
+			fmt.Println(err)
+			return false
+		}
+		if b.PreHash != tempHash {
+			return false
+		}
+		if !bc.ValidateConfirm(bc.LastBlock.PreHash, b.Confirm) {
+			return false
+		}
+		curIndex++
+	}
+	return true
 }
