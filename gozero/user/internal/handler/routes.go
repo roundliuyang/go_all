@@ -25,7 +25,14 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/user/register",
 				Handler: account.RegisterHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/user/info",
+				Handler: account.GetUserInfoHandler(serverCtx),
+			},
 		},
 		rest.WithPrefix("/v1"),
+		//开启jwt认证
+		rest.WithJwt(serverCtx.Config.Auth.Secret),
 	)
 }
