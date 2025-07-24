@@ -19,3 +19,8 @@ type RegisterReq struct {
 
 type RegisterResp struct {
 }
+
+type UserInfoResp struct {
+	Id       int64  `json:"id"`
+	Username string `json:"username"`
+}

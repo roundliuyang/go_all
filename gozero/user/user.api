@@ -18,8 +18,8 @@ type LoginResp {
 }
 
 type UserInfoResp {
-    Id       int64  `json:"id"`
-    Username string `json:"username"`
+	Id       int64  `json:"id"`
+	Username string `json:"username"`
 }
 
 @server (
@@ -38,7 +38,7 @@ service user-api {
 	@handler login
 	post /user/login (LoginReq) returns (LoginResp)
 
-    @handler getUserInfo
-    get /user/info returns (UserInfoResp)
+	@handler getUserInfo
+	get /user/info returns (UserInfoResp)
 }
 

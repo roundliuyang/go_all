@@ -24,6 +24,8 @@ var (
 	AlreadyRegister = NewError(10100, "用户已注册")
 	NameOrPwdError  = NewError(10101, "账号或密码错误")
 	TokenError      = NewError(10102, "token错误")
+	InvalidToken    = NewError(10103, "无效token")
+	UserNotExist    = NewError(10104, "无效token")
 )
 
 // 统一返回
