@@ -13,10 +13,10 @@ func main() {
 	flag.Parse()
 	engine := gin.Default()
 	engine.POST("/transaction/new", handlers.TransactionNew)
-	engine.POST("/mint", handlers.Mint)
+	engine.GET("/mint", handlers.Mint)
 	engine.GET("/show/chain", handlers.ShowBlockChain)
 	engine.POST("/nodes/add", handlers.Add)
-	engine.POST("/consensus", handlers.Consensus)
+	engine.GET("/consensus", handlers.Consensus)
 	port := fmt.Sprintf(":%d", *InPutPort)
 	engine.Run(port)
 }

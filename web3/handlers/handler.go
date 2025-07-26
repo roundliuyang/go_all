@@ -52,6 +52,7 @@ func Mint(c *gin.Context) {
 		return
 	}
 	id := strings.ReplaceAll(v4.String(), "-", "")
+	// 创建一个特殊的交易（没有发送方和接收方，可能是生成新币的交易，id 是生成的交易 ID，12 是金额）
 	BlockChain.NewTransaction("", id, 12)
 	newBlock := BlockChain.NewBlock(time.Now().UnixMilli(), confirm, "")
 	c.JSON(http.StatusOK, gin.H{
